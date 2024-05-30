@@ -6,6 +6,12 @@
         <link rel="stylesheet" type="text/css" href="{% static 'sudoku_solver/style.css' %}">
     </head>
     <body>
+        <nav class="navbar">
+            <ul>
+                <li><a href="{% url 'home'%}">Solver</a></li>
+                <li><a href="{% url 'details'%}">Details</a></li>
+            </ul>
+        </nav>
         <h1>Details</h1>
         <p>Some text</p>
     </body>
