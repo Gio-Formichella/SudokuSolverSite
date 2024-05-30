@@ -1,4 +1,12 @@
-{% extends "sudoku_solver/base.html" %}
-{% block content %}
-   <h1>Some details made by {{name}}</h1>
-{% endblock content%}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Sudoku solver</title>
+        {% load static %}
+        <link rel="stylesheet" type="text/css" href="{% static 'sudoku_solver/style.css' %}">
+    </head>
+    <body>
+        <h1>Details</h1>
+        <p>Some text</p>
+    </body>
+</html>

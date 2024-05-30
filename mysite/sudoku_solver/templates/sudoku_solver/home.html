@@ -1,4 +1,25 @@
-{% extends "sudoku_solver/base.html" %}
-{% block content %}
-    <h1>Sudoku board will go here</h1>
-{% endblock content%}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Sudoku solver</title>
+        {% load static %}
+        <link rel="stylesheet" type="text/css" href="{% static 'sudoku_solver/style.css' %}">
+    </head>
+    <body>
+        <h1>Sudoku solver</h1>
+        <div class="sudoku-solver">
+            <div class="board">
+                <!-- Generate 9x9 grid cells for the Sudoku board -->
+                {% for i in "012345678" %}
+                    {% for j in "012345678" %}
+                        <input type="text" maxlength="1" class="cell" id="cell-{{ i }}-{{ j }}">
+                    {% endfor %}
+                {% endfor %}
+            </div>
+            <div class="buttons">
+                <button class="solve-button">Solve</button>
+                <button class="stop-button">Stop</button>
+            </div>
+        </div>
+    </body>
+</html>
