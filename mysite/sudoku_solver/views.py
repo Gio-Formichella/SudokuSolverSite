@@ -21,3 +21,7 @@ def detail(request):
 
 def home(request):
     return render(request, "sudoku_solver/home.html")
+
+
+def sudoku_board(request):
+    return render(request, "sudoku_solver/sudoku_board.html", {})
