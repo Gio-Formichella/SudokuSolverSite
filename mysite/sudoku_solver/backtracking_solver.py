@@ -4,7 +4,7 @@ from queue import Queue
 
 import numpy as np
 
-from cell import Cell
+from .cell import Cell
 
 
 def backtracking_solver(puzzle, var_strategy="static", inference_strategy="mac") -> (np.ndarray, int, int) or None:
