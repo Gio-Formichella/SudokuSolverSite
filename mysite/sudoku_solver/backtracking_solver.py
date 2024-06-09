@@ -9,7 +9,7 @@ from .cell import Cell
 
 def backtracking_solver(puzzle, var_strategy="static", inference_strategy="mac") -> (np.ndarray, int, int) or None:
     """
-    :param puzzle: Sudoku puzzle
+    :param puzzle: Sudoku puzzle matrix
     :param var_strategy: Strategy for unassigned variable selection:
         - "static": First variable in static order
         - "random": Randomly selected
@@ -23,7 +23,10 @@ def backtracking_solver(puzzle, var_strategy="static", inference_strategy="mac")
 
     for i in range(9):
         for j in range(9):
-            board[i, j] = Cell(puzzle.board[i][j])
+            if puzzle[i][j] is not None:
+                board[i, j] = Cell(puzzle[i][j])
+            else:
+                board[i, j] = Cell()
 
     # Initializing assignments and backtracks counters
     counters = [0, 0]  # [assignments counter, backtracks counter
@@ -31,6 +34,12 @@ def backtracking_solver(puzzle, var_strategy="static", inference_strategy="mac")
     if not ac3(board, counters):
         return None
     result = backtracking_search(board, var_strategy, inference_strategy, counters)
+
+    if result is not None:
+        for i in range(9):
+            for j in range(9):
+                result[i][j] = result[i][j].value
+
     return result, counters[0], counters[1]
 
 

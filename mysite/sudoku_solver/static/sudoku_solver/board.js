@@ -1,45 +1,46 @@
-console.log("Hello world");
+const ws = new WebSocket("ws://" + window.location.host + "/ws/board/");
+console.log(ws)
 
-// Create a WebSocket connection to the specified URL
-const socket = new WebSocket(
-  "ws://" + window.location.host + "/ws/board/"
-);
-console.log(socket);
+const solveButton = document.querySelector('.solve-button');
+const stopButton = document.querySelector('.stop-button');
+const sudokuBoard = document.querySelector('.board');
 
-// Socket message listener to handle messages from the server
-socket.onmessage = (e) => {
-  const data = JSON.parse(e.data);
-  if (data.hasOwnProperty("solved_board")) {
-    const solvedBoard = data.solved_board;
-    for (let i = 0; i < 9; i++) {
-      for (let j = 0; j < 9; j++) {
-        const cellId = `cell-${i}-${j}`;
-        const cellElement = document.getElementById(cellId);
-        cellElement.value = solvedBoard[i][j];
-      }
-    }
-  }
-};
 
-// 'open' event listener to handle connection being established
-socket.onopen = (e) => {
-  socket.send(JSON.stringify({ message: "Hello from client" }));
-};
-
-// Function to capture user input and send updated puzzle state
-function sendUpdatedPuzzle() {
+function getPuzzle() {
   const puzzle = [];
-  for (let i = 0; i < 9; i++) {
-    puzzle[i] = [];
-    for (let j = 0; j < 9; j++) {
-      const cellId = `cell-${i}-${j}`;
-      const cellElement = document.getElementById(cellId);
-      puzzle[i][j] = parseInt(cellElement.value) || 0; // Handle empty cells as 0
+  for (let row = 0; row < 9; row++) {
+    const rowData = [];
+    for (let col = 0; col < 9; col++) {
+      const cell = document.getElementById(`cell-${row}-${col}`);
+      const value = parseInt(cell.value) || null;
+      rowData.push(value);
     }
+    puzzle.push(rowData);
   }
-  socket.send(JSON.stringify({ puzzle }));
+  return puzzle;
 }
 
-// Add event listener to the solve button
-const solveButton = document.querySelector(".solve-button");
-solveButton.addEventListener("click", sendUpdatedPuzzle);
+solveButton.addEventListener('click', () => {
+  const puzzle = getPuzzle();
+  ws.send(JSON.stringify(puzzle));
+});
+
+stopButton.addEventListener('click', () => {
+  // Add logic to handle stopping the solving process (if applicable)
+  console.log("Stopping solving...");  // Placeholder for your stop functionality
+});
+
+function updateBoard(solutionData) {
+  for (let row = 0; row < 9; row++) {
+    for (let col = 0; col < 9; col++) {
+      const cell = document.getElementById(`cell-${row}-${col}`);
+      cell.value = solutionData[row][col];
+    }
+  }
+}
+
+ws.onmessage = function(event) {
+    const solution = JSON.parse(event.data);
+    console.log(solution)
+    updateBoard(solution);
+};

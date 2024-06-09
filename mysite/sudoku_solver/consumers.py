@@ -1,5 +1,17 @@
-from channels.generic.websocket import AsyncWebsocketConsumer
 import json
+from json import JSONEncoder
+
+import numpy
+from channels.generic.websocket import AsyncWebsocketConsumer
+
+from .backtracking_solver import backtracking_solver
+
+
+class NumpyArrayEncoder(JSONEncoder):
+    def default(self, o):
+        if isinstance(o, numpy.ndarray):
+            return o.tolist()
+        return JSONEncoder.default(self, o)
 
 
 class BoardConsumer(AsyncWebsocketConsumer):
@@ -13,13 +25,8 @@ class BoardConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data=None, bytes_data=None):
         # Method called when server receives data from the client over websocket
-        text_data_json = json.loads(text_data)
-        #message = text_data_json["message"]
-        #sender = text_data_json["sender"]
+        puzzle = json.loads(text_data)
+        solved_puzzle = backtracking_solver(puzzle)
 
-        print("Got here")
-
-        # Sending the message back to the client over the websocket
-        await self.send(text_data=json.dumps({
-            "message": "m"
-        }))
+        message = json.dumps(solved_puzzle, cls=NumpyArrayEncoder)
+        await self.send(text_data=message)
