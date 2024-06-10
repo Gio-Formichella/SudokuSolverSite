@@ -2,7 +2,6 @@ const ws = new WebSocket("ws://" + window.location.host + "/ws/board/");
 console.log(ws)
 
 const solveButton = document.querySelector('.solve-button');
-const stopButton = document.querySelector('.stop-button');
 const sudokuBoard = document.querySelector('.board');
 
 
@@ -23,11 +22,6 @@ function getPuzzle() {
 solveButton.addEventListener('click', () => {
   const puzzle = getPuzzle();
   ws.send(JSON.stringify(puzzle));
-});
-
-stopButton.addEventListener('click', () => {
-  // Add logic to handle stopping the solving process (if applicable)
-  console.log("Stopping solving...");  // Placeholder for your stop functionality
 });
 
 function updateBoard(solutionData) {
