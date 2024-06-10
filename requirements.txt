@@ -1,0 +1,4 @@
+channels~=4.1.0
+django~=5.0.6
+pathlib~=1.0.1
+numpy~=1.24.3
