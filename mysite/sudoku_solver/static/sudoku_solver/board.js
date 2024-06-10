@@ -40,7 +40,7 @@ function updateBoard(solutionData) {
 }
 
 ws.onmessage = function(event) {
-    const solution = JSON.parse(event.data);
-    console.log(solution)
-    updateBoard(solution);
+    const message = JSON.parse(event.data);
+    board = message[0]
+    updateBoard(board);
 };
