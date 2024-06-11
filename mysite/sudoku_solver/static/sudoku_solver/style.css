@@ -84,3 +84,8 @@ h1 {
     text-align: center;
     margin: 10px;
 }
+
+.error-message {
+  color: red;
+  font-weight: bold;
+}
