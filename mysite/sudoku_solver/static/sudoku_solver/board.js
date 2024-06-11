@@ -53,6 +53,7 @@ function displayMessage(message, type) {
 solveButton.addEventListener('click', () => {
   puzzle = getPuzzle();
   ws.send(JSON.stringify(puzzle));
+  messageElement.textContent = "";
   messageElement.classList.remove('error-message');
 });
 
