@@ -26,7 +26,10 @@ class BoardConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data=None, bytes_data=None):
         # Method called when server receives data from the client over websocket
         puzzle = json.loads(text_data)
-        board = backtracking_solver(puzzle)
+        board, assignments, backtracks,  = backtracking_solver(puzzle)
 
-        message = json.dumps(board, cls=NumpyArrayEncoder)
+        message = json.dumps({
+            "board": board,
+            "msg": f"Solution found with {assignments} assignments and {backtracks} backtracks"
+        }, cls=NumpyArrayEncoder)
         await self.send(text_data=message)

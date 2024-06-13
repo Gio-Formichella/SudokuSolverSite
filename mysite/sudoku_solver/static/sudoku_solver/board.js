@@ -43,9 +43,9 @@ function flashBoardRed() {
   }
 }
 
-function displayMessage(message, type) {
-    if (type == "no-solution") {
-        messageElement.textContent = message;
+function displayMessage(message, error) {
+    messageElement.textContent = message;
+    if (error) {
         messageElement.classList.add('error-message');
     }
 }
@@ -59,16 +59,16 @@ solveButton.addEventListener('click', () => {
 
 ws.onmessage = function(event) {
     const message = JSON.parse(event.data);
+    console.log(message)
     if (message === null) {
         // puzzle has no solution
         flashBoardRed();
-        displayMessage("Puzzle has no solution", "no-solution")
-        if (puzzle){
-            updateBoard(puzzle)
-        }
+        displayMessage("Puzzle has no solution", true)
+        updateBoard(puzzle)
     }
     else {
-        board = message[0]
+        board = message.board
         updateBoard(board);
+        displayMessage(message.msg, false)
     }
 };
