@@ -27,6 +27,13 @@ function updateBoard(solutionData) {
     for (let col = 0; col < 9; col++) {
       const cell = document.getElementById(`cell-${row}-${col}`);
       cell.value = solutionData[row][col];
+      if (cell.value != puzzle[row][col]){
+          // flashing green the new additions
+          cell.style.background = '#04AA6D';
+          setTimeout(() => {
+              cell.style.background = '#fff'; // Reset to white background
+          }, 200); // Delay (in milliseconds)
+      }
     }
   }
 }
