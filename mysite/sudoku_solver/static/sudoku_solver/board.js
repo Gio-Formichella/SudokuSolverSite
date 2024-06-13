@@ -4,6 +4,7 @@ console.log(ws)
 const solveButton = document.querySelector('.solve-button');
 const sudokuBoard = document.querySelector('.board');
 const messageElement = document.querySelector('.solution-message');
+const resetButton = document.querySelector('.reset-button');
 
 let puzzle; // Will hold user puzzle
 
@@ -64,9 +65,22 @@ solveButton.addEventListener('click', () => {
   messageElement.classList.remove('error-message');
 });
 
+resetButton.addEventListener('click', () => {
+    // Stopping backend from sending updates
+    ws.send(JSON.stringify({"reset": true}))
+    //TODO: possible bug: rare case where the backend sends an update before flag change and after board clear
+
+    // Clearing board
+    for (let row = 0; row < 9; row++) {
+        for (let col = 0; col < 9; col++) {
+            const cell = document.getElementById(`cell-${row}-${col}`);
+            cell.value = "";
+        }
+    }
+});
+
 ws.onmessage = function(event) {
     const message = JSON.parse(event.data);
-    console.log(message)
     if (message === null) {
         // puzzle has no solution
         flashBoardRed();

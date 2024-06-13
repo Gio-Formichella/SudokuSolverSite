@@ -89,3 +89,12 @@ h1 {
   color: red;
   font-weight: bold;
 }
+
+.reset-button {
+    background-color: #FF4500;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    margin: 10px;
+}
