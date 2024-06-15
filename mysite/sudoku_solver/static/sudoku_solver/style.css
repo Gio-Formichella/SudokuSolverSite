@@ -98,3 +98,12 @@ h1 {
     text-align: center;
     margin: 10px;
 }
+
+.step-by-step-button {
+    background-color: #0000FF;
+    border: none;
+    color: white;
+    padding: 15px 32px;
+    text-align: center;
+    margin: 10px;
+}
