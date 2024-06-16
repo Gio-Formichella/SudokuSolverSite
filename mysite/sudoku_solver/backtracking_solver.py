@@ -7,7 +7,8 @@ import numpy as np
 from .cell import Cell
 
 
-def backtracking_solver(puzzle, var_strategy="static", inference_strategy="mac") -> (np.ndarray or None, int, int):
+async def backtracking_solver(puzzle, var_strategy="static", inference_strategy="mac", consumer=None) \
+        -> (np.ndarray or None, int, int):
     """
     :param puzzle: Sudoku puzzle matrix
     :param var_strategy: Strategy for unassigned variable selection:
@@ -17,6 +18,7 @@ def backtracking_solver(puzzle, var_strategy="static", inference_strategy="mac")
     :param inference_strategy: Type of domain reduction inference:
         - "mac": Maintaining arc consistency
         - "forward_checking": Forward checking, only neighbouring variables are checked
+    :param consumer: reference to BoardConsumer, used to send assignment updates
     :return:  Matrix solution or None if puzzle has no solution, number of assignments and number of backtracks
     """
     board = np.empty((9, 9), dtype=Cell)
@@ -33,7 +35,7 @@ def backtracking_solver(puzzle, var_strategy="static", inference_strategy="mac")
 
     if not ac3(board, counters):
         return None, counters[0], counters[1]
-    result = backtracking_search(board, var_strategy, inference_strategy, counters)
+    result = await backtracking_search(board, var_strategy, inference_strategy, counters, consumer)
 
     if result is not None:
         for i in range(9):
@@ -122,11 +124,12 @@ def revise(board, i1: int, j1: int, i2: int, j2: int) -> bool:
     return revised
 
 
-def backtracking_search(board, var_strategy: str, inference_strategy: str, counters: list) -> np.ndarray or None:
-    return backtrack(board, var_strategy, inference_strategy, counters)
+async def backtracking_search(board, var_strategy: str, inference_strategy: str, counters: list, consumer) \
+        -> np.ndarray or None:
+    return await backtrack(board, var_strategy, inference_strategy, counters, consumer)
 
 
-def backtrack(board, var_strategy: str, inference_strategy: str, counters: list) -> np.ndarray or None:
+async def backtrack(board, var_strategy: str, inference_strategy: str, counters: list, consumer) -> np.ndarray or None:
     # Checking for complete assignment
     found = False
     for i in range(9):
@@ -140,8 +143,10 @@ def backtrack(board, var_strategy: str, inference_strategy: str, counters: list)
     for value in order_domain_values(board, var):
         inference_board = inference(copy.deepcopy(board), var, value, inference_strategy, counters)
         counters[0] += 1  # Assignment
+        if consumer is not None:
+            await consumer.send_assignment_update(var[0], var[1], value, counters[0], counters[1])
         if inference_board is not None:
-            result = backtrack(inference_board, var_strategy, inference_strategy, counters)
+            result = await backtrack(inference_board, var_strategy, inference_strategy, counters, consumer)
             if result is not None:
                 return result
 
