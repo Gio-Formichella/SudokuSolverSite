@@ -28,15 +28,19 @@ class BoardConsumer(AsyncWebsocketConsumer):
     async def receive(self, text_data=None, bytes_data=None):
         # Method called when server receives data from the client over websocket
         received = json.loads(text_data)  # Is a puzzle or a reset message
-        if "reset" in received:
-            self.solver_running = False
-        else:  # user has sent a puzzle
-            self.solver_running = True
-            board, assignments, backtracks,  = backtracking_solver(received)
+        match received["type"]:
+            case "reset":
+                self.solver_running = False
+            case "solve":
+                self.solver_running = True
+                board, assignments, backtracks, = backtracking_solver(received["puzzle"])
 
-            if self.solver_running:  # No reset message has been received
-                message = json.dumps({
-                    "board": board,
-                    "msg": f"Solution found with {assignments} assignments and {backtracks} backtracks"
-                }, cls=NumpyArrayEncoder)
-                await self.send(text_data=message)
+                if self.solver_running:  # No reset message has been received
+                    message = json.dumps({
+                        "board": board,
+                        "msg": f"Solution found with {assignments} assignments and {backtracks} backtracks"
+                    }, cls=NumpyArrayEncoder)
+                    await self.send(text_data=message)
+
+            case "step-by-step":
+                pass

@@ -5,6 +5,7 @@ const solveButton = document.querySelector('.solve-button');
 const sudokuBoard = document.querySelector('.board');
 const messageElement = document.querySelector('.solution-message');
 const resetButton = document.querySelector('.reset-button');
+const stepByStepButton = document.querySelector('.step-by-step-button');
 
 let puzzle; // Will hold user puzzle
 
@@ -60,14 +61,20 @@ function displayMessage(message, error) {
 
 solveButton.addEventListener('click', () => {
   puzzle = getPuzzle();
-  ws.send(JSON.stringify(puzzle));
+  ws.send(JSON.stringify({
+    "type": "solve",
+    "puzzle": puzzle
+    }
+  ));
   messageElement.textContent = "";
   messageElement.classList.remove('error-message');
 });
 
 resetButton.addEventListener('click', () => {
     // Stopping backend from sending updates
-    ws.send(JSON.stringify({"reset": true}))
+    ws.send(JSON.stringify({
+        "type": "reset"
+    }))
     //TODO: possible bug: rare case where the backend sends an update before flag change and after board clear
 
     // Clearing board
@@ -78,6 +85,17 @@ resetButton.addEventListener('click', () => {
         }
     }
 });
+
+stepByStepButton.addEventListener('click', () => {
+  puzzle = getPuzzle();
+  ws.send(JSON.stringify({
+    "type": "step-by-step",
+    "puzzle": puzzle
+  }));
+  messageElement.textContent = "";
+  messageElement.classList.remove('error-message');
+});
+
 
 ws.onmessage = function(event) {
     const message = JSON.parse(event.data);
