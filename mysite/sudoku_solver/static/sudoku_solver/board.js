@@ -99,15 +99,17 @@ stepByStepButton.addEventListener('click', () => {
 
 ws.onmessage = function(event) {
     const message = JSON.parse(event.data);
-    if (message === null) {
-        // puzzle has no solution
-        flashBoardRed();
-        displayMessage("Puzzle has no solution", true)
-        updateBoard(puzzle)
-    }
-    else {
-        board = message.board
-        updateBoard(board);
-        displayMessage(message.msg, false)
+    switch(message.type){
+        case "solve":
+            if (message.board === null){
+                // puzzle has no solution
+                flashBoardRed();
+                displayMessage("Puzzle has no solution", true)
+            } else {
+                updateBoard(message.board);
+                displayMessage(message.msg, false)
+            }
+        case "step-by-step":
+            console.log(message)
     }
 };
