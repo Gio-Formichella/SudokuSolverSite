@@ -7,7 +7,7 @@ import numpy as np
 from .cell import Cell
 
 
-def backtracking_solver(puzzle, var_strategy="static", inference_strategy="mac") -> (np.ndarray, int, int) or None:
+def backtracking_solver(puzzle, var_strategy="static", inference_strategy="mac") -> (np.ndarray or None, int, int):
     """
     :param puzzle: Sudoku puzzle matrix
     :param var_strategy: Strategy for unassigned variable selection:
@@ -32,7 +32,7 @@ def backtracking_solver(puzzle, var_strategy="static", inference_strategy="mac")
     counters = [0, 0]  # [assignments counter, backtracks counter
 
     if not ac3(board, counters):
-        return None
+        return None, counters[0], counters[1]
     result = backtracking_search(board, var_strategy, inference_strategy, counters)
 
     if result is not None:
