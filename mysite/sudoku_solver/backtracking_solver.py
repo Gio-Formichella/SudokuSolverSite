@@ -33,7 +33,7 @@ async def backtracking_solver(puzzle, var_strategy="static", inference_strategy=
     # Initializing assignments and backtracks counters
     counters = [0, 0]  # [assignments counter, backtracks counter
 
-    if not ac3(board, counters):
+    if not await ac3(board, counters, consumer):
         return None, counters[0], counters[1]
     result = await backtracking_search(board, var_strategy, inference_strategy, counters, consumer)
 
@@ -45,7 +45,7 @@ async def backtracking_solver(puzzle, var_strategy="static", inference_strategy=
     return result, counters[0], counters[1]
 
 
-def ac3(board, counters) -> bool:
+async def ac3(board, counters, consumer) -> bool:
     queue = Queue()
     # Arcs relative to row and column constraints
     for i in range(9):
@@ -71,14 +71,15 @@ def ac3(board, counters) -> bool:
                             queue.put((i, j, k, n))
                             queue.put((k, n, i, j))
 
-    return propagate_constraints(board, queue, counters)
+    return await propagate_constraints(board, queue, counters, consumer)
 
 
-def propagate_constraints(board, queue, counters) -> bool:
+async def propagate_constraints(board, queue, counters, consumer) -> bool:
     """
     :param board: Sudoku puzzle board
     :param queue: Queue of constraints to be checked
     :param counters: List of counters for assignments and backtracks
+    :param consumer: reference to consumer object
     :return: True if all constraints are satisfiable, False otherwise
     """
 
@@ -91,8 +92,11 @@ def propagate_constraints(board, queue, counters) -> bool:
                 # Problem has no solution
                 return False
             if d_length == 1:
-                board[i1, j1].set_value(board[i1, j1].domain[0])  # Assigning value if only one is available
+                value = board[i1, j1].domain[0]
+                board[i1, j1].set_value(value)  # Assigning value if only one is available
                 counters[0] += 1
+                if consumer is not None:
+                    await consumer.send_assignment_update(i1, j1, value, counters[0], counters[1])
             # Propagation to all neighbors
             for k in range(9):
                 if k != j1 and (i1, k) != (i2, j2):
@@ -141,7 +145,7 @@ async def backtrack(board, var_strategy: str, inference_strategy: str, counters:
 
     var = select_unassigned_variable(board, var_strategy)  # tuple (row, column)
     for value in order_domain_values(board, var):
-        inference_board = inference(copy.deepcopy(board), var, value, inference_strategy, counters)
+        inference_board = await inference(copy.deepcopy(board), var, value, inference_strategy, counters, consumer)
         counters[0] += 1  # Assignment
         if consumer is not None:
             await consumer.send_assignment_update(var[0], var[1], value, counters[0], counters[1])
@@ -214,24 +218,24 @@ def order_domain_values(board: np.ndarray[Cell], var: tuple) -> list:
     return [t[0] for t in least_constraining_value]
 
 
-def inference(board, var, value, inference_strategy, counters) -> np.ndarray or None:
+async def inference(board, var, value, inference_strategy, counters, consumer) -> np.ndarray or None:
     i = var[0]
     j = var[1]
     board[i, j].set_value(value)
     match inference_strategy:
         case "mac":
-            if mac(board, (i, j), counters) is not None:
+            if await mac(board, (i, j), counters, consumer) is not None:
                 return board
             else:
                 return None
         case "forward_checking":
-            if forward_checking(board, (i, j), counters) is not None:
+            if forward_checking(board, (i, j), counters, consumer) is not None:
                 return board
             else:
                 return None
 
 
-def mac(board, var, counters) -> np.ndarray or None:
+async def mac(board, var, counters, consumer) -> np.ndarray or None:
     i = var[0]
     j = var[1]
     queue = Queue()
@@ -247,12 +251,12 @@ def mac(board, var, counters) -> np.ndarray or None:
             if (m, n) != (i, j) and board[m, n].value is None:
                 queue.put((m, n, i, j))
 
-    if propagate_constraints(board, queue, counters):
+    if await propagate_constraints(board, queue, counters, consumer):
         return board
     return None
 
 
-def forward_checking(board, var, counters) -> np.ndarray or None:
+async def forward_checking(board, var, counters, consumer) -> np.ndarray or None:
     i = var[0]
     j = var[1]
     queue = Queue()
@@ -277,7 +281,10 @@ def forward_checking(board, var, counters) -> np.ndarray or None:
                 # Problem has no solution
                 return None
             if d_length == 1:
-                board[i1, j1].set_value(board[i1, j1].domain[0])
+                value = board[i1, j1].domain[0]
+                board[i1, j1].set_value(value)
                 counters[0] += 1
+                if consumer is not None:
+                    await consumer.send_assignment_update(i1, j1, value, counters[0], counters[1])
 
     return board

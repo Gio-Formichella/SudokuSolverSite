@@ -8,6 +8,9 @@ const resetButton = document.querySelector('.reset-button');
 const stepByStepButton = document.querySelector('.step-by-step-button');
 
 let puzzle; // Will hold user puzzle
+const stepByStepMessageQueue = [];  // holds updates
+let stepByStepCounter = 0  // updates counter
+let interval;  // Reference to interval, used to stop
 
 function getPuzzle() {
   const puzzle = [];
@@ -109,7 +112,35 @@ ws.onmessage = function(event) {
                 updateBoard(message.board);
                 displayMessage(message.msg, false)
             }
+            break;
         case "step-by-step":
-            console.log(message)
+            stepByStepMessageQueue.push(message)
+            if (stepByStepCounter == 0) {
+                stepByStepCounter++;
+                interval = setInterval(displayStepByStepUpdates, 100);
+            }
+            break;
     }
 };
+
+function displayStepByStepUpdates() {
+    found = false;
+    i = 0; // queue iterator
+    while (!found && i < stepByStepMessageQueue.length){
+        if (stepByStepMessageQueue[i].count == stepByStepCounter){
+            // updating data
+            update = stepByStepMessageQueue[i];
+            const cell = document.getElementById(`cell-${update.row}-${update.col}`);
+            cell.value = update.value;
+            // flashing update green
+            cell.style.background = '#04AA6D';
+            setTimeout(() => {
+                cell.style.background = '#fff'; // Reset to white background
+            }, 200); // Delay (in milliseconds)
+
+            found = true;
+            stepByStepCounter++;
+        }
+        i++;
+    }
+}
