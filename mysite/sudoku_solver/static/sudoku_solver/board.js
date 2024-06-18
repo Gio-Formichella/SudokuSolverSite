@@ -8,7 +8,7 @@ const resetButton = document.querySelector('.reset-button');
 const stepByStepButton = document.querySelector('.step-by-step-button');
 
 let puzzle; // Will hold user puzzle
-const stepByStepMessageQueue = [];  // holds updates
+let stepByStepMessageQueue = [];  // holds updates
 let stepByStepCounter = 0  // updates counter
 let interval;  // Reference to interval, used to stop
 
@@ -87,6 +87,9 @@ resetButton.addEventListener('click', () => {
             cell.value = "";
         }
     }
+
+    messageElement.textContent = "";
+    messageElement.classList.remove('error-message');
 });
 
 stepByStepButton.addEventListener('click', () => {
@@ -117,7 +120,7 @@ ws.onmessage = function(event) {
             stepByStepMessageQueue.push(message)
             if (stepByStepCounter == 0) {
                 stepByStepCounter++;
-                interval = setInterval(displayStepByStepUpdates, 100);
+                interval = setInterval(displayStepByStepUpdates, 500);
             }
             break;
     }
@@ -128,18 +131,31 @@ function displayStepByStepUpdates() {
     i = 0; // queue iterator
     while (!found && i < stepByStepMessageQueue.length){
         if (stepByStepMessageQueue[i].count == stepByStepCounter){
-            // updating data
             update = stepByStepMessageQueue[i];
-            const cell = document.getElementById(`cell-${update.row}-${update.col}`);
-            cell.value = update.value;
-            // flashing update green
-            cell.style.background = '#04AA6D';
-            setTimeout(() => {
-                cell.style.background = '#fff'; // Reset to white background
-            }, 200); // Delay (in milliseconds)
-
-            found = true;
-            stepByStepCounter++;
+            if (update.final){
+                if (!update.found){
+                    //puzzle has no solution
+                    flashBoardRed();
+                    displayMessage("Puzzle has no solution", true)
+                } else{
+                    displayMessage(update.msg, false)
+                }
+                // resetting variables
+                clearInterval(interval)  // stopping looping method
+                stepByStepMessageQueue = []
+                stepByStepCounter = 0
+            } else {
+                const cell = document.getElementById(`cell-${update.row}-${update.col}`);
+                cell.value = update.value;
+                displayMessage(update.msg, false)
+                // flashing update green
+                cell.style.background = '#04AA6D';
+                setTimeout(() => {
+                    cell.style.background = '#fff'; // Reset to white background
+                }, 200); // Delay (in milliseconds)
+                found = true;
+                stepByStepCounter++;
+            }
         }
         i++;
     }
