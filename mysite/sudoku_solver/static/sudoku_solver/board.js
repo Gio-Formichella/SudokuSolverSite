@@ -79,7 +79,9 @@ resetButton.addEventListener('click', () => {
         "type": "reset"
     }))
     //TODO: possible bug: rare case where the backend sends an update before flag change and after board clear
-
+    stepByStepCounter = 0  // updates counter
+    clearInterval(interval)
+    stepByStepMessageQueue = [];  // holds updates
     // Clearing board
     for (let row = 0; row < 9; row++) {
         for (let col = 0; col < 9; col++) {
