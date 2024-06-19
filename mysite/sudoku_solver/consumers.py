@@ -33,7 +33,9 @@ class BoardConsumer(AsyncWebsocketConsumer):
                 self.solver_running = False
             case "solve":
                 self.solver_running = True
-                board, assignments, backtracks, _ = await backtracking_solver(puzzle=received["puzzle"])
+                board, assignments, backtracks, _ = await backtracking_solver(
+                    puzzle=received["puzzle"], var_strategy=received["var_strategy"],
+                    inference_strategy=received["inference_strategy"])
 
                 if self.solver_running:  # No reset message has been received
                     message = json.dumps({
@@ -46,8 +48,9 @@ class BoardConsumer(AsyncWebsocketConsumer):
             case "step-by-step":
                 self.solver_running = True
                 # Method will call send_assignment_update
-                board, assignments, backtracks, message_count = await backtracking_solver(puzzle=received["puzzle"],
-                                                                                          consumer=self)
+                board, assignments, backtracks, message_count = await backtracking_solver(
+                    puzzle=received["puzzle"], var_strategy=received["var_strategy"],
+                    inference_strategy=received["inference_strategy"], consumer=self)
                 found = False
                 if board is not None:
                     found = True

@@ -64,9 +64,13 @@ function displayMessage(message, error) {
 
 solveButton.addEventListener('click', () => {
   puzzle = getPuzzle();
+  let varStrategy = document.querySelector('input[name="var-strategy"]:checked').value;
+  let inferenceStrategy = document.querySelector('input[name="inference-strategy"]:checked').value;
   ws.send(JSON.stringify({
     "type": "solve",
-    "puzzle": puzzle
+    "puzzle": puzzle,
+    "var_strategy": varStrategy,
+    "inference_strategy": inferenceStrategy
     }
   ));
   messageElement.textContent = "";
@@ -96,9 +100,13 @@ resetButton.addEventListener('click', () => {
 
 stepByStepButton.addEventListener('click', () => {
   puzzle = getPuzzle();
+  let varStrategy = document.querySelector('input[name="var-strategy"]:checked').value;
+  let inferenceStrategy = document.querySelector('input[name="inference-strategy"]:checked').value;
   ws.send(JSON.stringify({
     "type": "step-by-step",
-    "puzzle": puzzle
+    "puzzle": puzzle,
+    "var_strategy": varStrategy,
+    "inference_strategy": inferenceStrategy
   }));
   messageElement.textContent = "";
   messageElement.classList.remove('error-message');
