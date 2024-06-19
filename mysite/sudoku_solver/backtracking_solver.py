@@ -8,7 +8,7 @@ from .cell import Cell
 
 
 async def backtracking_solver(puzzle, var_strategy="static", inference_strategy="mac", consumer=None) \
-        -> (np.ndarray or None, int, int):
+        -> (np.ndarray or None, int, int, int):
     """
     :param puzzle: Sudoku puzzle matrix
     :param var_strategy: Strategy for unassigned variable selection:
@@ -31,9 +31,9 @@ async def backtracking_solver(puzzle, var_strategy="static", inference_strategy=
                 board[i, j] = Cell()
 
     # Initializing assignments and backtracks counters
-    counters = [0, 0]  # [assignments counter, backtracks counter
+    counters = [0, 0, 0]  # [assignments counter, backtracks counter, message counter]
 
-    if not await ac3(board, counters, consumer):
+    if not await ac3(board):
         return None, counters[0], counters[1]
     result = await backtracking_search(board, var_strategy, inference_strategy, counters, consumer)
 
@@ -42,10 +42,10 @@ async def backtracking_solver(puzzle, var_strategy="static", inference_strategy=
             for j in range(9):
                 result[i][j] = result[i][j].value
 
-    return result, counters[0], counters[1]
+    return result, counters[0], counters[1], counters[2]
 
 
-async def ac3(board, counters, consumer) -> bool:
+async def ac3(board) -> bool:
     queue = Queue()
     # Arcs relative to row and column constraints
     for i in range(9):
@@ -71,15 +71,13 @@ async def ac3(board, counters, consumer) -> bool:
                             queue.put((i, j, k, n))
                             queue.put((k, n, i, j))
 
-    return await propagate_constraints(board, queue, counters, consumer)
+    return await propagate_constraints(board, queue)
 
 
-async def propagate_constraints(board, queue, counters, consumer) -> bool:
+async def propagate_constraints(board, queue) -> bool:
     """
     :param board: Sudoku puzzle board
     :param queue: Queue of constraints to be checked
-    :param counters: List of counters for assignments and backtracks
-    :param consumer: reference to consumer object
     :return: True if all constraints are satisfiable, False otherwise
     """
 
@@ -91,12 +89,6 @@ async def propagate_constraints(board, queue, counters, consumer) -> bool:
             if d_length == 0:
                 # Problem has no solution
                 return False
-            if d_length == 1:
-                value = board[i1, j1].domain[0]
-                board[i1, j1].set_value(value)  # Assigning value if only one is available
-                counters[0] += 1
-                if consumer is not None:
-                    await consumer.send_assignment_update(i1, j1, value, counters[0], counters[1])
             # Propagation to all neighbors
             for k in range(9):
                 if k != j1 and (i1, k) != (i2, j2):
@@ -145,16 +137,22 @@ async def backtrack(board, var_strategy: str, inference_strategy: str, counters:
 
     var = select_unassigned_variable(board, var_strategy)  # tuple (row, column)
     for value in order_domain_values(board, var):
-        inference_board = await inference(copy.deepcopy(board), var, value, inference_strategy, counters, consumer)
+        inference_board = await inference(copy.deepcopy(board), var, value, inference_strategy)
         counters[0] += 1  # Assignment
         if consumer is not None:
-            await consumer.send_assignment_update(var[0], var[1], value, counters[0], counters[1])
+            counters[2] += 1  # Sending new message
+            await consumer.send_assignment_update(var[0], var[1], value, counters[0], counters[1], counters[2])
         if inference_board is not None:
             result = await backtrack(inference_board, var_strategy, inference_strategy, counters, consumer)
             if result is not None:
                 return result
 
         counters[1] += 1  # Backtracking
+
+    # Clearing cell from constraint-unsatisfiable value
+    if consumer is not None:
+        counters[2] += 1
+        await consumer.send_assignment_update(var[0], var[1], "", counters[0], counters[1], counters[2])
 
     return None
 
@@ -218,24 +216,24 @@ def order_domain_values(board: np.ndarray[Cell], var: tuple) -> list:
     return [t[0] for t in least_constraining_value]
 
 
-async def inference(board, var, value, inference_strategy, counters, consumer) -> np.ndarray or None:
+async def inference(board, var, value, inference_strategy) -> np.ndarray or None:
     i = var[0]
     j = var[1]
     board[i, j].set_value(value)
     match inference_strategy:
         case "mac":
-            if await mac(board, (i, j), counters, consumer) is not None:
+            if await mac(board, (i, j)) is not None:
                 return board
             else:
                 return None
         case "forward_checking":
-            if forward_checking(board, (i, j), counters, consumer) is not None:
+            if forward_checking(board, (i, j)) is not None:
                 return board
             else:
                 return None
 
 
-async def mac(board, var, counters, consumer) -> np.ndarray or None:
+async def mac(board, var) -> np.ndarray or None:
     i = var[0]
     j = var[1]
     queue = Queue()
@@ -251,12 +249,12 @@ async def mac(board, var, counters, consumer) -> np.ndarray or None:
             if (m, n) != (i, j) and board[m, n].value is None:
                 queue.put((m, n, i, j))
 
-    if await propagate_constraints(board, queue, counters, consumer):
+    if await propagate_constraints(board, queue):
         return board
     return None
 
 
-async def forward_checking(board, var, counters, consumer) -> np.ndarray or None:
+async def forward_checking(board, var) -> np.ndarray or None:
     i = var[0]
     j = var[1]
     queue = Queue()
@@ -280,11 +278,5 @@ async def forward_checking(board, var, counters, consumer) -> np.ndarray or None
             if d_length == 0:
                 # Problem has no solution
                 return None
-            if d_length == 1:
-                value = board[i1, j1].domain[0]
-                board[i1, j1].set_value(value)
-                counters[0] += 1
-                if consumer is not None:
-                    await consumer.send_assignment_update(i1, j1, value, counters[0], counters[1])
 
     return board

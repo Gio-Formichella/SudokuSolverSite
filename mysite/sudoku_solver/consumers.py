@@ -33,7 +33,7 @@ class BoardConsumer(AsyncWebsocketConsumer):
                 self.solver_running = False
             case "solve":
                 self.solver_running = True
-                board, assignments, backtracks = await backtracking_solver(puzzle=received["puzzle"])
+                board, assignments, backtracks, _ = await backtracking_solver(puzzle=received["puzzle"])
 
                 if self.solver_running:  # No reset message has been received
                     message = json.dumps({
@@ -46,20 +46,22 @@ class BoardConsumer(AsyncWebsocketConsumer):
             case "step-by-step":
                 self.solver_running = True
                 # Method will call send_assignment_update
-                board, assignments, backtracks = await backtracking_solver(puzzle=received["puzzle"], consumer=self)
+                board, assignments, backtracks, message_count = await backtracking_solver(puzzle=received["puzzle"],
+                                                                                          consumer=self)
                 found = False
                 if board is not None:
                     found = True
                 message = json.dumps({
                     "type": "step-by-step",
                     "msg": f"Solution found with {assignments} assignments and {backtracks} backtracks",
-                    "count": assignments + 1,
+                    "count": message_count + 1,
                     "found": found,  # Did puzzle have a solution
                     "final": True
                 })
                 await self.send(message)  # Sending completion message
 
-    async def send_assignment_update(self, row: int, col: int, value: int, assignments: int, backtracks: int):
+    async def send_assignment_update(self, row: int, col: int, value: int, assignments: int, backtracks: int,
+                                     count: int):
         if self.solver_running:  # Non reset message has been received
             message = json.dumps({
                 "type": "step-by-step",
@@ -68,7 +70,7 @@ class BoardConsumer(AsyncWebsocketConsumer):
                 "value": value,
                 "msg": f"Current state found with {assignments} assignments and {backtracks} backtracks. \n "
                        f"Note: process slowed down for display clarity purposes",
-                "count": assignments,  # Using assignment count for message ordering
+                "count": count,  # Using assignment count for message ordering
                 "final": False
             })
             await self.send(text_data=message)
