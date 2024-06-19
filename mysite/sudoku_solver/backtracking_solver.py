@@ -34,7 +34,7 @@ async def backtracking_solver(puzzle, var_strategy="static", inference_strategy=
     counters = [0, 0, 0]  # [assignments counter, backtracks counter, message counter]
 
     if not await ac3(board):
-        return None, counters[0], counters[1]
+        return None, counters[0], counters[1], counters[2]
     result = await backtracking_search(board, var_strategy, inference_strategy, counters, consumer)
 
     if result is not None:
