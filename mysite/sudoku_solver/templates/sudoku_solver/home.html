@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Sudoku solver</title>
+        <title>Backtracking sudoku solver</title>
         {% load static %}
         <link rel="stylesheet" type="text/css" href="{% static 'sudoku_solver/style.css' %}">
         <script src="{% static 'sudoku_solver/board.js' %}" defer></script>
@@ -16,14 +16,42 @@
         </nav>
         <h1>Sudoku solver</h1>
         <div class="sudoku-solver">
-            <div class="board">
-                <!-- Generate 9x9 grid cells for the Sudoku board -->
-                {% for i in "012345678" %}
-                    {% for j in "012345678" %}
-                        <input type="text" maxlength="1" class="cell" id="cell-{{ i }}-{{ j }}">
+            <div class="solver-container">
+                <div class="board">
+                    <!-- Generate 9x9 grid cells for the Sudoku board -->
+                    {% for i in "012345678" %}
+                        {% for j in "012345678" %}
+                            <input type="text" maxlength="1" class="cell" id="cell-{{ i }}-{{ j }}">
+                        {% endfor %}
                     {% endfor %}
-                {% endfor %}
+                </div>
+
+                <div id="solver-controls">
+                    <h2>Variable Strategy:</h2>
+                    <div class="radio-group">
+                      <input type="radio" id="var-static" name="var-strategy" value="static" checked>
+                      <label for="var-static">Static</label>
+                    </div>
+                    <div class="radio-group">
+                      <input type="radio" id="var-random" name="var-strategy" value="random">
+                      <label for="var-random">Random</label>
+                    </div>
+                    <div class="radio-group">
+                      <input type="radio" id="var-mrv" name="var-strategy" value="mrv">
+                      <label for="var-mrv">MRV</label>
+                    </div>
+                    <h2>Inference Strategy:</h2>
+                    <div class="radio-group">
+                      <input type="radio" id="inference-mac" name="inference-strategy" value="mac" checked>
+                      <label for="inference-mac">MAC</label>
+                    </div>
+                    <div class="radio-group">
+                      <input type="radio" id="inference-forward" name="inference-strategy" value="forward_checking">
+                      <label for="inference-forward">Forward Checking</label>
+                    </div>
+                </div>
             </div>
+
             <div class="buttons">
                 <button class="solve-button">Solve</button>
                 <button class="reset-button">Reset</button>
