@@ -126,3 +126,44 @@ h1 {
     text-align: center;
     margin: 10px;
 }
+
+.details {
+    font-size: 18px;
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    line-height: 1.6;
+}
+
+icon-buttons {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    gap: 2000px;
+}
+.icon-buttons a {
+    display: inline-block;
+    width: 100px;
+    height: 100px;
+    line-height: 100px; /* Match line-height to center the icon */
+    text-align: center;
+    border-radius: 50%;
+    transition: background-color 0.3s, color 0.3s;
+    font-size: 50px;
+    margin: 0 20px; /* Add horizontal margin for spacing */
+}
+.icon-buttons a.github {
+    background-color: black; /* Set GitHub icon background to black */
+    color: white; /* Set GitHub icon color to white */
+}
+.icon-buttons a.github:hover {
+    background-color: white; /* Set hover background color to white */
+    color: black; /* Set hover icon color to black */
+}
+.icon-buttons a.linkedin {
+    background-color: #0077B5; /* Set LinkedIn icon background to LinkedIn blue */
+    color: white; /* Set LinkedIn icon color to white */
+}
+.icon-buttons a.linkedin:hover {
+    background-color: #005582; /* Set hover background color to a darker LinkedIn blue */
+}

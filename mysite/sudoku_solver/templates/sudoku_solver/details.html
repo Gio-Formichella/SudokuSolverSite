@@ -4,6 +4,7 @@
         <title>Sudoku solver</title>
         {% load static %}
         <link rel="stylesheet" type="text/css" href="{% static 'sudoku_solver/style.css' %}">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     </head>
     <body>
         <nav class="navbar">
@@ -13,6 +14,26 @@
             </ul>
         </nav>
         <h1>Details</h1>
-        <p>Some text</p>
+        <div class="details">
+            <p>
+                The primary aim of the project was giving a GUI and a usage to the backtracking sudoku solver algorithm
+                I had already implemented <a href="https://github.com/Gio-Formichella/SudokuSolvers">here</a>. The
+                secondary goal was to explore the Django framework and build a web application.
+            </p>
+            <p>
+                My interest in the world of CS lies in AI and not web development so excuse my spaghetti code and
+                the minimalist graphics.
+            </p>
+        </div>
+
+        <div class="icon-buttons">
+            <a href="https://github.com/Gio-Formichella" class="github" target="_blank" title="GitHub Profile">
+                <i class="fab fa-github"></i>
+            </a>
+            <a href="https://www.linkedin.com/in/gio-formichella-22343029a/" class="linkedin" target="_blank" title="LinkedIn Profile">
+                <i class="fab fa-linkedin-in"></i>
+            </a>
+        </div>
+
     </body>
 </html>
