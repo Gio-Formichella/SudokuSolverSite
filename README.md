@@ -1,33 +1,40 @@
-## Sudoku Solver Site
+# Sudoku Solver Site
 
-This project is a Django web application that allows users to input a Sudoku puzzle and receive a solution through a WebSocket connection.
+Sudoku puzzle solving Django web application. It allows users to:
 
-## Requirements
+* Manually enter Sudoku puzzles.
+* Select variable choice strategies: Static order, Random, Minimum remaining values.
+* Choose inference strategies: Maintaining arc consistency, Forward checking.
+* Visualize the step-by-step solution process (optional).
+* View information about the solving process (number of assignments, backtracks).
 
-* Python 3.x ([https://www.python.org/downloads/](https://www.python.org/downloads/))
-* Django ([https://docs.djangoproject.com/en/5.0/](https://docs.djangoproject.com/en/5.0/))
-* Web browser that supports WebSockets (most modern browsers do)
+The primary goal of the project was to build a graphical interface for the backtracking sudoku solver I previously
+implemented [here](https://github.com/Gio-Formichella/SudokuSolvers).
+Additionally, it served as a hands-on learning experience of web applications and of the Django framework.
 
-## Installation
+My interest in the world of CS lies in AI and not web development so excuse my spaghetti code and the minimalist
+graphics.
 
-1. Clone this repository:
+## Dependencies
 
-   ```
-   git clone https://github.com/Gio-Formichella/SudokuSolverSite
-   ```
+To install the packages needed to run the program you will need to run:
 
-2. Install dependencies:
+```
+pip install -r requirements.txt
+```
 
-   ```
-   pip install -r requirements.txt
-   ```
+After the installments you are ready to run the server as default in Django.
 
-## Running the application
+## Usage
 
-1. Run Django's development server:
+1. Run the Django development server:
 
-   ```
-   python manage.py runserver
-   ```
+```
+python manage.py runserver
+```
 
-2. Access the application in your web browser at `http://localhost:8000/`.
+2. Access the application in your web browser (usually at http://127.0.0.1:8000/).
+
+## Issues and Bugs
+
+Please report any issues you encounter.
